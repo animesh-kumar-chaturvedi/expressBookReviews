@@ -4,6 +4,46 @@ let isValid = require("./auth_users.js").isValid;
 let users = require("./auth_users.js").users;
 const public_users = express.Router();
 
+let BookPromise = new Promise((resolve,reject) => {
+  setTimeout(() => {
+    resolve(books)
+  },10000)})
+
+  let bookById = (isbn) =>{
+
+    return new Promise((resolve,reject)=>{
+      setTimeout(()=>{
+        resolve(books[isbn])
+      }),10000
+    })
+
+  }
+
+  let bookByAuthor = (author) =>{
+    return new Promise((resolve,reject)=>{
+      setTimeout(()=>{
+        for (const book in books){
+          if(books[book].author == author){
+           resolve(books[book])
+          }
+        }
+        reject("Book Not Found")
+      }),10000
+    })}
+
+
+    let bookByTitle = (title) =>{
+      return new Promise((resolve,reject)=>{
+        setTimeout(()=>{
+          for (const book in books){
+            if(books[book].title == title){
+             resolve(books[book])
+            }
+          }
+          reject("Book Not Found")
+        }),10000
+      })}
+
 
 public_users.post("/register", (req,res) => {
  let username = req.body.username
@@ -28,60 +68,57 @@ res.status(200).json({"message" : "User Registered Succssfully"})
 
 // Get the book list available in the shop
 public_users.get('/',function (req, res) {
-  return res.status(200).json(books)
+
+  BookPromise.then((data) => {
+    return res.status(200).json(data)
+  }).catch((err)=>{
+    return res.status(204).json({"message": "Error getting available books"})
+  })
+
+
+
+  
 });
 
 // Get book details based on ISBN
 public_users.get('/isbn/:isbn',function (req, res) {
 
-  res.status(302).send(books[req.params.isbn])
+
+  isbn = req.params.isbn
+
+  return bookById(isbn).then(data => {
+    console.log(data)
+    return res.status(200).json(data)
+  }).catch((err)=>{
+    return res.status(204).json({"message": "Error getting available books"})
+  })
+
+
+
+
  });
   
 // Get book details based on author
 public_users.get('/author/:author',function (req, res) {
-  let resBook
-  for (const book in books){
-
-    bookAuthor = req.params.author
-
-    if(books[book].author == bookAuthor){
-      resBook = books[book]
-      break;
-    }
-  }
-
-  if(resBook){
-    res.status(302).send(resBook)
-
-  }else{
-
-    res.status(404).send(`No book found by author ${bookAuthor}`)
-  }
+  
+  bookByAuthor(req.params.author)
+  .then((data)=>{
+    return res.status(200).json(data)
+  }).catch(err =>{
+    return res.send(err)
+  })
 
   
 });
 
 // Get all books based on title
 public_users.get('/title/:title',function (req, res)  {
-  let resBook
-
-  for (const book in books){
-
-    bookTitle = req.params.title
-
-    if(books[book].title == bookTitle){
-      resBook = books[book]
-      break;
-      
-    }
-  }
-  if(resBook){
-    res.status(302).send(resBook)
-  }else{
-    res.status(404).send(`No book found by author ${bookTitle}`)
-  }
-
-  
+  bookByTitle(req.params.title)
+  .then((data)=>{
+    return res.status(200).json(data)
+  }).catch(err =>{
+    return res.send(err)
+  })
 });
 
 //  Get book review

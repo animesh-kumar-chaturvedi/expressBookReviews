@@ -47,19 +47,31 @@ regd_users.put("/auth/review/:isbn", (req, res) => {
   isbn = req.params.isbn
   review = req.query.review
 
-  username=req.session.authorization.username
+  let username=req.session.authorization.username
 
-  let originalReview = users[isbn].reviews
+  let originalReview = books[isbn].reviews
 
-  console.log(originalReview)
-  console.log(typeof( originalReview))
-
-
-
-  users[isbn].review.push({username:review})
+  books[isbn].reviews= {
+    ...originalReview,
+    [username]:review
+  }
 
   return res.json({"message":"review updated sucessfully"})
 
+
+
+});
+
+
+regd_users.delete('/auth/review/:isbn',(req,res) => {
+
+  let username = req.session.authorization.username
+  let originalReview = books[isbn].reviews
+  console.log(typeof(originalReview))
+
+ delete originalReview[username]
+
+  res.status(200).json({"message":"review deleted sucessfully"})
 
 
 });
