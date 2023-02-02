@@ -74,41 +74,27 @@ public_users.get('/',function (req, res) {
   }).catch((err)=>{
     return res.status(204).json({"message": "Error getting available books"})
   })
-
-
-
-  
 });
 
 // Get book details based on ISBN
 public_users.get('/isbn/:isbn',function (req, res) {
-
-
   isbn = req.params.isbn
-
   return bookById(isbn).then(data => {
     console.log(data)
     return res.status(200).json(data)
   }).catch((err)=>{
     return res.status(204).json({"message": "Error getting available books"})
   })
-
-
-
-
  });
   
 // Get book details based on author
 public_users.get('/author/:author',function (req, res) {
-  
   bookByAuthor(req.params.author)
   .then((data)=>{
     return res.status(200).json(data)
   }).catch(err =>{
     return res.send(err)
   })
-
-  
 });
 
 // Get all books based on title
